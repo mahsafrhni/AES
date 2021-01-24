@@ -35,6 +35,12 @@ public class Encryption {
             } else {
                 if (i % 4 != 0) {
                     w[i] = xorforHexadecimals(w[i - 1], w[i - 4]);
+                    if (w[i].length() < 8) {
+                        int count = 8 - w[i].length();
+                        for (int j = 0; j < count; j++) {
+                            w[i] = ("0").concat(w[i]);
+                        }
+                    }
                 } else {
                     if (w[i - 1].length() < 8) {
                         int count = 8 - w[i - 1].length();
@@ -48,9 +54,15 @@ public class Encryption {
                             w[i - 4] = ("0").concat(w[i - 4]);
                         }
                     }
-                    String[] test = subByteForKey(RotWord(w[i - 1]));
+                    String[] test = subByteForKey((w[i - 1]).substring(2) + (w[i - 1]).substring(0, 2));
                     String subByted = test[0].concat(test[1]).concat(test[2]).concat(test[3]);
                     w[i] = xorforHexadecimals(xorforHexadecimals(subByted, Rconst[(i / 4) - 1]), w[i - 4]);
+                    if (w[i].length() < 8) {
+                        int count = 8 - w[i].length();
+                        for (int j = 0; j < count; j++) {
+                            w[i] = ("0").concat(w[i]);
+                        }
+                    }
                 }
             }
         }
@@ -70,14 +82,39 @@ public class Encryption {
             for (int j = 0; j < 4; j++) {  //convert 1d arr to 2d
                 System.arraycopy(t1, (j * 4), newsubBytes[j], 0, 4);
             }
-            newsubBytes = mixColumn(newsubBytes);
+            String[][] newsubBytes4 = new String[4][4];
+            for (int j = 0; j < 4; j++) {
+                for (int l = 0; l < 4; l++) {
+                    newsubBytes4[l][j] = newsubBytes[j][l];
+                }
+            }
+            newsubBytes = mixColumn(newsubBytes4);
             String newsubBytes2 = "";
             for (int l = 0; l < 4; l++) {
                 for (int m = 0; m < 4; m++) {
                     newsubBytes2 = newsubBytes2.concat(newsubBytes[l][m]);
                 }
             }
-            String[] rt = AddRoundKey(newsubBytes2, w[k], w[k + 1], w[k + 2], w[k + 3]);
+            List<String> parts = getParts(newsubBytes2);
+            String newsubBytes21 = "";
+            String newsubBytes22 = "";
+            String newsubBytes23 = "";
+            String newsubBytes24 = "";
+            String newsubBytes222;
+            for (int j = 0; j < 25; j += 8) {
+                newsubBytes21 = newsubBytes21.concat(parts.get(j).concat(parts.get(j + 1)));
+            }
+            for (int j = 2; j < 27; j += 8) {
+                newsubBytes22 = newsubBytes22.concat(parts.get(j).concat(parts.get(j + 1)));
+            }
+            for (int j = 4; j < 29; j += 8) {
+                newsubBytes23 = newsubBytes23.concat(parts.get(j).concat(parts.get(j + 1)));
+            }
+            for (int j = 6; j < 31; j += 8) {
+                newsubBytes24 = newsubBytes24.concat(parts.get(j).concat(parts.get(j + 1)));
+            }
+            newsubBytes222 = newsubBytes21.concat(newsubBytes22.concat(newsubBytes23.concat(newsubBytes24)));
+            String[] rt = AddRoundKey(newsubBytes222, w[k], w[k + 1], w[k + 2], w[k + 3]);
             String newsubBytes3 = "";
             for (String s : rt) {
                 newsubBytes3 = newsubBytes3.concat(s);
@@ -91,22 +128,9 @@ public class Encryption {
             s = s.concat(value);
         }
         String[] t2 = AddRoundKey(s, w[40], w[41], w[42], w[43]);
-        System.out.print(t2[0]);
-        System.out.print(t2[4]);
-        System.out.print(t2[8]);
-        System.out.print(t2[12]);
-        System.out.print(t2[1]);
-        System.out.print(t2[5]);
-        System.out.print(t2[9]);
-        System.out.print(t2[13]);
-        System.out.print(t2[2]);
-        System.out.print(t2[6]);
-        System.out.print(t2[10]);
-        System.out.print(t2[14]);
-        System.out.print(t2[3]);
-        System.out.print(t2[7]);
-        System.out.print(t2[11]);
-        System.out.print(t2[15]);
+        for (int i = 0; i < 16; i++) {
+            System.out.print(t2[i]);
+        }
     }
 
     public static String RotWord(String s) {
@@ -116,10 +140,26 @@ public class Encryption {
     public static String[] AddRoundKey(String plaintext, String key0, String key1, String key2, String key3) {
         List<String> listOfP = getParts(plaintext);
         String[] result = new String[16];
-        List<String> resultforKey0 = getParts(key0);
-        List<String> resultforKey1 = getParts(key1);
-        List<String> resultforKey2 = getParts(key2);
-        List<String> resultforKey3 = getParts(key3);
+        List<String> resultforrKey0 = getParts(key0);
+        List<String> resultforrKey1 = getParts(key1);
+        List<String> resultforrKey2 = getParts(key2);
+        List<String> resultforrKey3 = getParts(key3);
+        String keyn0 = resultforrKey0.get(0).concat(resultforrKey0.get(1).concat
+                (resultforrKey1.get(0).concat(resultforrKey1.get(1).concat(resultforrKey2.get(0).
+                        concat(resultforrKey2.get(1).concat(resultforrKey3.get(0).concat(resultforrKey3.get(1))))))));
+        String keyn1 = resultforrKey0.get(2).concat(resultforrKey0.get(3).concat
+                (resultforrKey1.get(2).concat(resultforrKey1.get(3).concat(resultforrKey2.get(2).
+                        concat(resultforrKey2.get(3).concat(resultforrKey3.get(2).concat(resultforrKey3.get(3))))))));
+        String keyn2 = resultforrKey0.get(4).concat(resultforrKey0.get(5).concat
+                (resultforrKey1.get(4).concat(resultforrKey1.get(5).concat(resultforrKey2.get(4).
+                        concat(resultforrKey2.get(5).concat(resultforrKey3.get(4).concat(resultforrKey3.get(5))))))));
+        String keyn3 = resultforrKey0.get(6).concat(resultforrKey0.get(7).concat
+                (resultforrKey1.get(6).concat(resultforrKey1.get(7).concat(resultforrKey2.get(6).
+                        concat(resultforrKey2.get(7).concat(resultforrKey3.get(6).concat(resultforrKey3.get(7))))))));
+        List<String> resultforKey0 = getParts(keyn0);
+        List<String> resultforKey1 = getParts(keyn1);
+        List<String> resultforKey2 = getParts(keyn2);
+        List<String> resultforKey3 = getParts(keyn3);
         for (int i = 0, j = 0; i < 25; i += 8, j += 2) {
             int a = Integer.parseInt(listOfP.get(i).concat(listOfP.get(i + 1)), 16) ^
                     Integer.parseInt(resultforKey0.get(j).concat(resultforKey0.get(j + 1)), 16);
@@ -148,7 +188,6 @@ public class Encryption {
         for (int i = 4, j = 0; i < 29; i += 8, j += 2) {
             int a = Integer.parseInt(listOfP.get(i).concat(listOfP.get(i + 1)), 16) ^
                     Integer.parseInt(resultforKey2.get(j).concat(resultforKey2.get(j + 1)), 16);
-
             if (Integer.toHexString(a).length() < 2) {
                 int count = 2 - Integer.toHexString(a).length();
                 for (int l = 0; l < count; l++) {
@@ -177,12 +216,12 @@ public class Encryption {
     public static String xorforHexadecimals(String s1, String s2) {
         char[] characters = new char[s1.length()];
         for (int i = 0; i < characters.length; i++) {
-            characters[i] = toHex(fromHex(s1.charAt(i)) ^ fromHex(s2.charAt(i)));
+            characters[i] = "0123456789ABCDEF".charAt(fh(s1.charAt(i)) ^ fh(s2.charAt(i)));
         }
         return new String(characters);
     }
 
-    private static int fromHex(char c) {
+    public static int fh(char c) {
         if (c >= '0' && c <= '9') {
             return c - '0';
         }
@@ -191,15 +230,9 @@ public class Encryption {
         }
         if (c >= 'a' && c <= 'f') {
             return c - 'a' + 10;
+        } else {
+            return 0;
         }
-        throw new IllegalArgumentException();
-    }
-
-    private static char toHex(int nybble) {
-        if (nybble < 0 || nybble > 15) {
-            throw new IllegalArgumentException();
-        }
-        return "0123456789ABCDEF".charAt(nybble);
     }
 
     public static String[] subByte(String plaintext) {
@@ -241,8 +274,14 @@ public class Encryption {
                 int a = (Integer.parseInt(meydanMult(matrix[i][0], subBytes[0][j]), 16) ^
                         Integer.parseInt(meydanMult(matrix[i][1], subBytes[1][j]), 16) ^
                         Integer.parseInt(meydanMult(matrix[i][2], subBytes[2][j]), 16) ^
-                        Integer.parseInt(meydanMult(matrix[i][3], subBytes[3][j]), 16)) % 256;
-                product[i][j] = Integer.toHexString(a);
+                        Integer.parseInt(meydanMult(matrix[i][3], subBytes[3][j]), 16));
+                int b;
+                if (a > 255) {
+                    b = (a % 256) ^ 27;
+                } else {
+                    b = a;
+                }
+                product[i][j] = Integer.toHexString(b);
                 if (product[i][j].length() < 2) {
                     int c = 2 - product[i][j].length();
                     for (int k = 0; k < c; k++) {
@@ -262,28 +301,29 @@ public class Encryption {
     public static String meydanMult(String i, String j) {
         int result;
         if (i.equals("0x02")) {
-            int a = Integer.parseInt(j, 16) * 2;
-            if (a > 255) {
-                result = a ^ 27;
+            if ((Integer.parseInt(j, 16) * 2) >= 256) {
+                result = ((Integer.parseInt(j, 16) * 2) % 256) ^ 27;
             } else {
-                result = a;
+                result = Integer.parseInt(j, 16) * 2;
             }
         } else if (i.equals("0x03")) {
-            int a = Integer.parseInt(j, 16) * 2;
             int b;
-            if (a > 255) {
-                b = (a % 256) ^ 27;
+            if (Integer.parseInt(j, 16) * 2 >= 256) {
+                b = ((Integer.parseInt(j, 16) * 2) % 256) ^ 27;
             } else {
-                b = a;
+                b = Integer.parseInt(j, 16) * 2;
             }
-            int c = b ^ Integer.parseInt(j, 16);
-            if (c > 255) {
-                result = (b % 256) ^ 27;
+            if ((b ^ Integer.parseInt(j, 16)) >= 256) {
+                result = ((b ^ Integer.parseInt(j, 16)) % 256) ^ 27;
             } else {
-                result = c;
+                result = b ^ Integer.parseInt(j, 16);
             }
         } else {
-            result = Integer.parseInt(j, 16);
+            if (Integer.parseInt(j, 16) >= 256) {
+                result = ((Integer.parseInt(j, 16) % 256)) ^ 27;
+            } else {
+                result = Integer.parseInt(j, 16);
+            }
         }
         return Integer.toHexString(result);
     }
@@ -291,21 +331,21 @@ public class Encryption {
     public static void shiftRow(String[] subBytes) {
         String[] shiftRow = new String[16];
         shiftRow[0] = subBytes[0];
-        shiftRow[1] = subBytes[1];
-        shiftRow[2] = subBytes[2];
-        shiftRow[3] = subBytes[3];
-        shiftRow[4] = subBytes[5];
-        shiftRow[5] = subBytes[6];
-        shiftRow[6] = subBytes[7];
-        shiftRow[7] = subBytes[4];
-        shiftRow[8] = subBytes[10];
-        shiftRow[9] = subBytes[11];
-        shiftRow[10] = subBytes[8];
-        shiftRow[11] = subBytes[9];
-        shiftRow[12] = subBytes[15];
-        shiftRow[13] = subBytes[12];
-        shiftRow[14] = subBytes[13];
-        shiftRow[15] = subBytes[14];
+        shiftRow[1] = subBytes[5];
+        shiftRow[2] = subBytes[10];
+        shiftRow[3] = subBytes[15];
+        shiftRow[4] = subBytes[4];
+        shiftRow[5] = subBytes[9];
+        shiftRow[6] = subBytes[14];
+        shiftRow[7] = subBytes[3];
+        shiftRow[8] = subBytes[8];
+        shiftRow[9] = subBytes[13];
+        shiftRow[10] = subBytes[2];
+        shiftRow[11] = subBytes[7];
+        shiftRow[12] = subBytes[12];
+        shiftRow[13] = subBytes[1];
+        shiftRow[14] = subBytes[6];
+        shiftRow[15] = subBytes[11];
         System.arraycopy(shiftRow, 0, subBytes, 0, 16);
     }
 
